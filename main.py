@@ -4,8 +4,8 @@ from datetime import datetime
 import os
 
 # --- CONFIG --- 
-SHEET_ID = "1AbCDeFgHiJkLmNoPqRsTuVwXyZ1234567890"  # <-- VERVANG DIT MET JOUW EIGEN SHEET ID
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
+SHEET_ID = "1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA"  # <-- VERVANG DIT MET JOUW EIGEN SHEET ID
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA/edit?gid=0#gid=0"
 OUTPUT_BESTAND = "markeringen.csv"
 
 # --- LAAD LEERLINGEN ---
