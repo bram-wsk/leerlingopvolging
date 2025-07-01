@@ -5,7 +5,7 @@ import os
 
 # --- CONFIG --- 
 SHEET_ID = "1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA"  # <-- VERVANG DIT MET JOUW EIGEN SHEET ID
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA/edit?gid=0#gid=0"
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA/edit?usp=sharing"
 OUTPUT_BESTAND = "markeringen.csv"
 
 # --- LAAD LEERLINGEN ---
