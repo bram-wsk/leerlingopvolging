@@ -1,58 +1,47 @@
+import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
 
-# Vervang dit met jouw Google Sheet ID
-SHEET_ID = "1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA"
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA/edit?gid=0#gid=0"
-
-# Bestandsnaam waar alles wordt opgeslagen
+# --- CONFIG --- 
+SHEET_ID = "1AbCDeFgHiJkLmNoPqRsTuVwXyZ1234567890"  # <-- VERVANG DIT MET JOUW EIGEN SHEET ID
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
 OUTPUT_BESTAND = "markeringen.csv"
 
-def lees_leerlingen(sheet_url):
+# --- LAAD LEERLINGEN ---
+@st.cache_data
+def laad_leerlingen():
     try:
-        df = pd.read_csv(sheet_url)
+        df = pd.read_csv(SHEET_URL)
         if "naam" not in df.columns:
-            raise ValueError("❌ Kolom 'naam' ontbreekt in de sheet.")
+            st.error("❌ Kolom 'naam' ontbreekt in de sheet.")
+            return pd.DataFrame()
         return df
     except Exception as e:
-        print(f"❌ Fout bij inlezen van leerlingen: {e}")
-        exit()
+        st.error(f"❌ Fout bij het laden van leerlingen: {e}")
+        return pd.DataFrame()
 
-def selecteer_leerling(leerlingen_df):
-    print("\n📋 Leerlingenlijst:\n")
-    for i, naam in enumerate(leerlingen_df["naam"], start=1):
-        print(f"{i}. {naam}")
-    try:
-        keuze = int(input("\nNummer van leerling: "))
-        return leerlingen_df.iloc[keuze - 1]["naam"]
-    except:
-        print("❌ Ongeldige keuze.")
-        exit()
+# --- STREAMLIT UI ---
+st.title("📘 Leerlingen Markering Formulier")
 
-def voeg_markering_toe(naam, bestand):
-    reden = input("Reden van markering: ").strip()
-    streep = input("Aantal strepen (bv. 1): ").strip()
+df_leerlingen = laad_leerlingen()
+
+if df_leerlingen.empty:
+    st.stop()
+
+# Selecteer leerling
+naam = st.selectbox("Kies een leerling:", df_leerlingen["naam"].tolist())
+
+reden = st.text_area("Reden van markering:")
+strepen = st.number_input("Aantal strepen:", min_value=1, max_value=10, step=1)
+
+if st.button("✅ Opslaan"):
     datum = datetime.today().strftime("%Y-%m-%d")
-
-    regel = {
+    nieuw = pd.DataFrame([{
         "datum": datum,
         "naam": naam,
         "reden": reden,
-        "strepen": streep
-    }
-
-    df_nieuw = pd.DataFrame([regel])
-
-    bestand_bestaat = os.path.isfile(bestand)
-    df_nieuw.to_csv(bestand, mode="a", index=False, header=not bestand_bestaat)
-    print(f"✅ Markering opgeslagen in '{bestand}'.")
-
-def main():
-    leerlingen = lees_leerlingen(SHEET_URL)
-    naam = selecteer_leerling(leerlingen)
-    voeg_markering_toe(naam, OUTPUT_BESTAND)
-
-if __name__ == "__main__":
-    main()
-
+        "strepen": strepen
+    }])
+    nieuw.to_csv(OUTPUT_BESTAND, mode="a", index=False, header=not os.path.exists(OUTPUT_BESTAND))
+    st.success("Markering succesvol opgeslagen!")
