@@ -3,8 +3,8 @@ from datetime import datetime
 import os
 
 # Vervang dit met jouw Google Sheet ID
-SHEET_ID = "1AbCDeFgHiJkLmNoPqRsTuVwXyZ1234567890"
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
+SHEET_ID = "1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA"
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/1mY3AZgVQ53OATWh1Zir7_nnnTcVyLbjPSs9F8PJK9BA/edit?gid=0#gid=0"
 
 # Bestandsnaam waar alles wordt opgeslagen
 OUTPUT_BESTAND = "markeringen.csv"
