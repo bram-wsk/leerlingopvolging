@@ -21,7 +21,11 @@ else:
     df_status = pd.DataFrame({"naam": df["naam"], "status": ""})
     df_status.to_csv(status_path, index=False)
 
-# --- ZET NAAM ALS INDEX (makkelijker manipuleren) ---
+# Zorg dat 'naam' een kolom blijft (geen index)
+if "naam" not in df_status.columns:
+    df_status.reset_index(inplace=True)
+
+# Zet om naar bewerkbare index
 df_status.set_index("naam", inplace=True)
 
 # --- FORMULIER ---
@@ -47,6 +51,7 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
+    # Controleer status
     status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
     # Update status als er 3 strepen zijn
@@ -54,15 +59,16 @@ for i, row in df.iterrows():
         df_status.loc[naam, "status"] = "wachten_op_straf"
         status = "wachten_op_straf"
 
-    # Toon status en eventueel knop
     knop_ingedrukt = False
     if status == "wachten_op_straf":
         with col3:
             col3.markdown("🟠 *Wachten op straf*")
+
         knop_ingedrukt = st.button(f"Straf afgehandeld: {naam}", key=f"straf_af_{i}")
 
     if knop_ingedrukt:
         df_status.loc[naam, "status"] = ""
+        # Reset index en opslaan
         df_status.reset_index().to_csv(status_path, index=False)
         st.success(f"✅ Strafstatus verwijderd voor {naam}")
         st.rerun()
