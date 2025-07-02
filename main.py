@@ -53,11 +53,11 @@ for i, row in df.iterrows():
     # Huidige status ophalen
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    # ✅ Zet status alleen als hij nog niet op "wachten_op_straf" staat én nu 3 strepen zijn
+    # ✅ Zet status enkel als hij nog niet op 'wachten_op_straf' staat én 3 strepen zijn ingevoerd
     if huidige_status != "wachten_op_straf" and strepen == 3:
         df_status.loc[naam, "status"] = "wachten_op_straf"
 
-    # ❗ Toon status en knop als status op 'wachten_op_straf' staat
+    # ❗ Toon status en knop alleen als status momenteel 'wachten_op_straf' is
     if df_status.loc[naam, "status"] == "wachten_op_straf":
         col3.markdown("🟠 *Wachten op straf*")
 
@@ -89,12 +89,8 @@ if st.button("✅ Opslaan"):
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
-# --- OVERZICHT ---
+# --- DOWNLOADKNOP ---
 if os.path.exists("markeringen.csv"):
-    st.subheader("📊 Overzicht van ingevoerde markeringen")
-    df_mark = pd.read_csv("markeringen.csv")
-    st.dataframe(df_mark)
-
     with open("markeringen.csv", "rb") as f:
         st.download_button(
             label="⬇️ Download markeringen",
