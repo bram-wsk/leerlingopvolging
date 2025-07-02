@@ -22,7 +22,7 @@ st.write("Gebruik de knoppen om het aantal strepen per leerling aan te passen:")
 
 # --- LEERLINGENLIJST MET STREPEN EN KNOPPEN ---
 for i, naam in enumerate(df["naam"]):
-    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+    col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 3])
     with col1:
         st.markdown(f"**{naam}**")
     with col2:
@@ -35,6 +35,9 @@ for i, naam in enumerate(df["naam"]):
         if st.button("➖", key=f"min_{i}"):
             if st.session_state.strepen[naam] > 0:
                 st.session_state.strepen[naam] -= 1
+    with col5:
+        if st.session_state.strepen[naam] >= 3:
+            st.markdown("🟠 *Wachten op straf*")
 
 # --- OPSLAAN ---
 if st.button("✅ Opslaan"):
