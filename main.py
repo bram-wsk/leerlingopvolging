@@ -21,11 +21,10 @@ else:
     df_status = pd.DataFrame({"naam": df["naam"], "status": ""})
     df_status.to_csv(status_path, index=False)
 
-# Zorg dat 'naam' een kolom blijft (geen index)
+# Zorg dat 'naam' een kolom blijft
 if "naam" not in df_status.columns:
     df_status.reset_index(inplace=True)
 
-# Zet om naar bewerkbare index
 df_status.set_index("naam", inplace=True)
 
 # --- FORMULIER ---
@@ -51,28 +50,25 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-    # Controleer status
-    status = df_status.loc[naam, "status"] if naam in df_status.index else ""
+    # Bepaal huidige status
+    huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    # Update status als er 3 strepen zijn
-    if strepen == 3 and status != "wachten_op_straf":
+    # Alleen status zetten als het nog niet "wachten_op_straf" is
+    if huidige_status != "wachten_op_straf" and strepen == 3:
         df_status.loc[naam, "status"] = "wachten_op_straf"
-        status = "wachten_op_straf"
+        huidige_status = "wachten_op_straf"
 
-    knop_ingedrukt = False
-    if status == "wachten_op_straf":
-        with col3:
-            col3.markdown("🟠 *Wachten op straf*")
+    # Toon status en knop buiten kolommen
+    if huidige_status == "wachten_op_straf":
+        col3.markdown("🟠 *Wachten op straf*")
 
-        knop_ingedrukt = st.button(f"Straf afgehandeld: {naam}", key=f"straf_af_{i}")
+        if st.button(f"Straf afgehandeld: {naam}", key=f"straf_af_{i}"):
+            df_status.loc[naam, "status"] = ""
+            df_status.reset_index().to_csv(status_path, index=False)
+            st.success(f"✅ Strafstatus verwijderd voor {naam}")
+            st.rerun()
 
-    if knop_ingedrukt:
-        df_status.loc[naam, "status"] = ""
-        # Reset index en opslaan
-        df_status.reset_index().to_csv(status_path, index=False)
-        st.success(f"✅ Strafstatus verwijderd voor {naam}")
-        st.rerun()
-
+    # Verzamel invoer
     if strepen > 0:
         invoer.append({
             "datum": datetime.today().strftime("%Y-%m-%d"),
