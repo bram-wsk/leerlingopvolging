@@ -50,16 +50,17 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-    # Bepaal huidige status
+    # Huidige status
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    # Alleen status zetten als het nog niet "wachten_op_straf" is
-    if huidige_status != "wachten_op_straf" and strepen == 3:
-        df_status.loc[naam, "status"] = "wachten_op_straf"
-        huidige_status = "wachten_op_straf"
-
-    # Toon status en knop buiten kolommen
+    # Logica voor strafstatus
     if huidige_status == "wachten_op_straf":
+        df_status.loc[naam, "status"] = "wachten_op_straf"
+    elif strepen == 3:
+        df_status.loc[naam, "status"] = "wachten_op_straf"
+
+    # Toon status en eventueel knop
+    if df_status.loc[naam, "status"] == "wachten_op_straf":
         col3.markdown("🟠 *Wachten op straf*")
 
         if st.button(f"Straf afgehandeld: {naam}", key=f"straf_af_{i}"):
