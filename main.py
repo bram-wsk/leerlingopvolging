@@ -13,69 +13,64 @@ except Exception as e:
     st.error(f"❌ Fout bij inlezen van leerlingen: {e}")
     st.stop()
 
-# --- INITIËLE STANDEN OPSLAAN ---
-if "strepen" not in st.session_state:
-    st.session_state.strepen = {naam: 0 for naam in df["naam"]}
+# --- LAAD STRAFSTATUS OF INITIALISEER ---
+status_path = "strafstatus.csv"
+if os.path.exists(status_path):
+    df_status = pd.read_csv(status_path)
+else:
+    df_status = pd.DataFrame({"naam": df["naam"], "status": ""})
+    df_status.to_csv(status_path, index=False)
 
-if "wachten_op_straf" not in st.session_state:
-    st.session_state.wachten_op_straf = {naam: False for naam in df["naam"]}
-
+# --- FORMULIER ---
 st.title("📘 Leerlingen Markering Formulier")
-st.write("Klik op ➕ of ➖ om strepen toe te kennen of af te trekken (max 3).")
+st.write("Voer het aantal strepen in voor elke leerling (max. 3):")
 
-# --- LEERLINGENLIJST MET BALK EN KNOPPEN ---
-for i, naam in enumerate(df["naam"]):
-    st.markdown(f"**{naam}**")
-    col1, col2, col3 = st.columns([1, 5, 3])
+invoer = []
 
-    with col1:
-        if st.button("➖", key=f"min_{i}"):
-            if st.session_state.strepen[naam] > 0:
-                st.session_state.strepen[naam] -= 1
+for i, row in df.iterrows():
+    naam = row["naam"]
 
-    with col2:
-        aantal = st.session_state.strepen[naam]
-        # Visuele balk: 🟦 = actief, 🔲 = leeg
-        balk = " ".join(["🟦" if j < aantal else "🔲" for j in range(3)])
-        st.markdown(f"<div style='text-align: center; font-size: 24px'>{balk}</div>", unsafe_allow_html=True)
+    strepen = st.number_input(
+        label=f"{naam}",
+        min_value=0,
+        max_value=3,
+        step=1,
+        key=f"strepen_{i}"
+    )
 
-    with col3:
-        if st.button("➕", key=f"plus_{i}"):
-            if st.session_state.strepen[naam] < 3:
-                st.session_state.strepen[naam] += 1
-                if st.session_state.strepen[naam] == 3:
-                    st.session_state.wachten_op_straf[naam] = True
+    # Bepaal of status geactiveerd moet worden
+    status = df_status.loc[df_status["naam"] == naam, "status"].values[0]
+    if strepen == 3 and status != "wachten_op_straf":
+        df_status.loc[df_status["naam"] == naam, "status"] = "wachten_op_straf"
 
-    # Statusmelding
-    if st.session_state.wachten_op_straf[naam]:
+    # Verzamel voor opslaan
+    if strepen > 0:
+        invoer.append({
+            "datum": datetime.today().strftime("%Y-%m-%d"),
+            "naam": naam,
+            "strepen": strepen
+        })
+
+    # Toon status
+    if df_status.loc[df_status["naam"] == naam, "status"].values[0] == "wachten_op_straf":
         st.markdown("🟠 *Wachten op straf*")
-
-st.markdown("---")
 
 # --- OPSLAAN ---
 if st.button("✅ Opslaan"):
-    invoer = []
-    for naam, aantal in st.session_state.strepen.items():
-        if aantal > 0:
-            invoer.append({
-                "datum": datetime.today().strftime("%Y-%m-%d"),
-                "naam": naam,
-                "strepen": aantal
-            })
-
     if invoer:
         df_nieuw = pd.DataFrame(invoer)
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
         st.success("✅ Markeringen opgeslagen!")
 
-        # Reset waarden
-        for naam in st.session_state.strepen:
-            st.session_state.strepen[naam] = 0
-            st.session_state.wachten_op_straf[naam] = False
+        # Strafstatus blijft behouden — géén reset!
+        df_status.to_csv(status_path, index=False)
+
+        # Optioneel: herlaad interface na opslaan
+        st.experimental_rerun()
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
-# --- OVERZICHT ---
+# --- OVERZICHT TONEN ALS BESTAND BESTAAT ---
 if os.path.exists("markeringen.csv"):
     st.subheader("📊 Overzicht van ingevoerde markeringen")
     df_mark = pd.read_csv("markeringen.csv")
