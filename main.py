@@ -16,23 +16,23 @@ except Exception as e:
 # --- FORMULIER ---
 st.title("📘 Leerlingen Markering Formulier")
 
-st.write("Voer strepen en redenen in per leerling:")
+st.write("Voer het aantal strepen in voor elke leerling:")
 
 invoer = []
 
 for i, row in df.iterrows():
     naam = row["naam"]
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        reden = st.text_input(f"Reden voor {naam}:", key=f"reden_{i}")
-    with col2:
-        strepen = st.number_input(f"Strepen voor {naam}:", min_value=0, max_value=10, step=1, key=f"strepen_{i}")
-    
+    strepen = st.number_input(
+        label=f"{naam}",
+        min_value=0,
+        max_value=10,
+        step=1,
+        key=f"strepen_{i}"
+    )
     if strepen > 0:
         invoer.append({
             "datum": datetime.today().strftime("%Y-%m-%d"),
             "naam": naam,
-            "reden": reden,
             "strepen": strepen
         })
 
