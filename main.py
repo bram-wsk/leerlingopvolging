@@ -46,13 +46,22 @@ for i, row in df.iterrows():
 
     with col3:
         status = df_status.loc[df_status["naam"] == naam, "status"].values[0]
+        
+        # Zet status als er 3 strepen zijn en nog geen status
         if strepen == 3 and status != "wachten_op_straf":
             df_status.loc[df_status["naam"] == naam, "status"] = "wachten_op_straf"
             status = "wachten_op_straf"
 
+        # Toon status en knop om te verwijderen
         if status == "wachten_op_straf":
-            st.markdown("🟠 *Wachten op straf*")
+            col3.markdown("🟠 *Wachten op straf*")
+            if col3.button("Straf afgehandeld", key=f"straf_af_{i}"):
+                df_status.loc[df_status["naam"] == naam, "status"] = ""
+                st.success(f"✅ Strafstatus verwijderd voor {naam}")
+                df_status.to_csv(status_path, index=False)
+                st.experimental_rerun()
 
+    # Voeg markeringen toe aan invoer
     if strepen > 0:
         invoer.append({
             "datum": datetime.today().strftime("%Y-%m-%d"),
