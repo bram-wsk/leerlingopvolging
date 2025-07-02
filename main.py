@@ -29,7 +29,7 @@ for i, naam in enumerate(df["naam"]):
         st.markdown(f"**{st.session_state.strepen[naam]}**")
     with col3:
         if st.button("➕", key=f"plus_{i}"):
-            if st.session_state.strepen[naam] < 10:
+            if st.session_state.strepen[naam] < 3:
                 st.session_state.strepen[naam] += 1
     with col4:
         if st.button("➖", key=f"min_{i}"):
