@@ -17,6 +17,10 @@ except Exception as e:
 if "strepen" not in st.session_state:
     st.session_state.strepen = {naam: 0 for naam in df["naam"]}
 
+# --- STATUS "WACHTEN OP STRAF" INITIALISEREN ---
+if "wachten_op_straf" not in st.session_state:
+    st.session_state.wachten_op_straf = {naam: False for naam in df["naam"]}
+
 st.title("📘 Leerlingen Markering Formulier")
 st.write("Gebruik de knoppen om het aantal strepen per leerling aan te passen:")
 
@@ -31,12 +35,14 @@ for i, naam in enumerate(df["naam"]):
         if st.button("➕", key=f"plus_{i}"):
             if st.session_state.strepen[naam] < 3:
                 st.session_state.strepen[naam] += 1
+                if st.session_state.strepen[naam] == 3:
+                    st.session_state.wachten_op_straf[naam] = True
     with col4:
         if st.button("➖", key=f"min_{i}"):
             if st.session_state.strepen[naam] > 0:
                 st.session_state.strepen[naam] -= 1
     with col5:
-        if st.session_state.strepen[naam] >= 3:
+        if st.session_state.wachten_op_straf[naam]:
             st.markdown("🟠 *Wachten op straf*")
 
 # --- OPSLAAN ---
@@ -57,6 +63,7 @@ if st.button("✅ Opslaan"):
         # Reset de waarden
         for naam in st.session_state.strepen:
             st.session_state.strepen[naam] = 0
+            st.session_state.wachten_op_straf[naam] = False
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
