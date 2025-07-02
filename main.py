@@ -13,38 +13,50 @@ except Exception as e:
     st.error(f"❌ Fout bij inlezen van leerlingen: {e}")
     st.stop()
 
-# --- FORMULIER ---
+# --- INITIËLE STANDEN OPSLAAN ---
+if "strepen" not in st.session_state:
+    st.session_state.strepen = {naam: 0 for naam in df["naam"]}
+
 st.title("📘 Leerlingen Markering Formulier")
+st.write("Gebruik de knoppen om het aantal strepen per leerling aan te passen:")
 
-st.write("Voer het aantal strepen in voor elke leerling:")
+for i, naam in enumerate(df["naam"]):
+    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+    with col1:
+        st.markdown(f"**{naam}**")
+    with col2:
+        if st.button("➖", key=f"min_{i}"):
+            if st.session_state.strepen[naam] > 0:
+                st.session_state.strepen[naam] -= 1
+    with col3:
+        st.markdown(f"**{st.session_state.strepen[naam]}**")
+    with col4:
+        if st.button("➕", key=f"plus_{i}"):
+            if st.session_state.strepen[naam] < 10:
+                st.session_state.strepen[naam] += 1
 
-invoer = []
-
-for i, row in df.iterrows():
-    naam = row["naam"]
-    strepen = st.number_input(
-        label=f"{naam}",
-        min_value=0,
-        max_value=10,
-        step=1,
-        key=f"strepen_{i}"
-    )
-    if strepen > 0:
-        invoer.append({
-            "datum": datetime.today().strftime("%Y-%m-%d"),
-            "naam": naam,
-            "strepen": strepen
-        })
-
+# --- OPSLAAN ---
 if st.button("✅ Opslaan"):
+    invoer = []
+    for naam, aantal in st.session_state.strepen.items():
+        if aantal > 0:
+            invoer.append({
+                "datum": datetime.today().strftime("%Y-%m-%d"),
+                "naam": naam,
+                "strepen": aantal
+            })
+
     if invoer:
         df_nieuw = pd.DataFrame(invoer)
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
         st.success("✅ Markeringen opgeslagen!")
+        # Reset de waarden
+        for naam in st.session_state.strepen:
+            st.session_state.strepen[naam] = 0
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
-# --- OVERZICHT TONEN ALS BESTAND BESTAAT ---
+# --- OVERZICHT ---
 if os.path.exists("markeringen.csv"):
     st.subheader("📊 Overzicht van ingevoerde markeringen")
     df_mark = pd.read_csv("markeringen.csv")
