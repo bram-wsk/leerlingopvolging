@@ -50,16 +50,14 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-    # Huidige status
+    # Huidige status ophalen
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    # Logica voor strafstatus
-    if huidige_status == "wachten_op_straf":
-        df_status.loc[naam, "status"] = "wachten_op_straf"
-    elif strepen == 3:
+    # ✅ Zet status alleen als hij nog niet op "wachten_op_straf" staat én nu 3 strepen zijn
+    if huidige_status != "wachten_op_straf" and strepen == 3:
         df_status.loc[naam, "status"] = "wachten_op_straf"
 
-    # Toon status en eventueel knop
+    # ❗ Toon status en knop als status op 'wachten_op_straf' staat
     if df_status.loc[naam, "status"] == "wachten_op_straf":
         col3.markdown("🟠 *Wachten op straf*")
 
