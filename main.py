@@ -47,20 +47,25 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-    with col3:
-        status = df_status.loc[naam, "status"] if naam in df_status.index else ""
+    status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-        if strepen == 3 and status != "wachten_op_straf":
-            df_status.loc[naam, "status"] = "wachten_op_straf"
-            status = "wachten_op_straf"
+    # Update status als er 3 strepen zijn
+    if strepen == 3 and status != "wachten_op_straf":
+        df_status.loc[naam, "status"] = "wachten_op_straf"
+        status = "wachten_op_straf"
 
-        if status == "wachten_op_straf":
+    # Toon status en eventueel knop
+    knop_ingedrukt = False
+    if status == "wachten_op_straf":
+        with col3:
             col3.markdown("🟠 *Wachten op straf*")
-            if col3.button("Straf afgehandeld", key=f"straf_af_{i}"):
-                df_status.loc[naam, "status"] = ""
-                df_status.reset_index().to_csv(status_path, index=False)
-                st.success(f"✅ Strafstatus verwijderd voor {naam}")
-                st.rerun()
+        knop_ingedrukt = st.button(f"Straf afgehandeld: {naam}", key=f"straf_af_{i}")
+
+    if knop_ingedrukt:
+        df_status.loc[naam, "status"] = ""
+        df_status.reset_index().to_csv(status_path, index=False)
+        st.success(f"✅ Strafstatus verwijderd voor {naam}")
+        st.rerun()
 
     if strepen > 0:
         invoer.append({
