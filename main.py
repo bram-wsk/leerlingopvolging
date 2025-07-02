@@ -59,7 +59,7 @@ for i, row in df.iterrows():
                 df_status.loc[df_status["naam"] == naam, "status"] = ""
                 st.success(f"✅ Strafstatus verwijderd voor {naam}")
                 df_status.to_csv(status_path, index=False)
-                st.experimental_rerun()
+                st.rerun()  # <-- aangepast
 
     # Voeg markeringen toe aan invoer
     if strepen > 0:
@@ -79,7 +79,7 @@ if st.button("✅ Opslaan"):
         # Strafstatus blijft behouden
         df_status.to_csv(status_path, index=False)
 
-        st.experimental_rerun()
+        st.rerun()  # <-- aangepast
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
