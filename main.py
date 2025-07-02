@@ -17,33 +17,40 @@ except Exception as e:
 if "strepen" not in st.session_state:
     st.session_state.strepen = {naam: 0 for naam in df["naam"]}
 
-# --- STATUS "WACHTEN OP STRAF" INITIALISEREN ---
 if "wachten_op_straf" not in st.session_state:
     st.session_state.wachten_op_straf = {naam: False for naam in df["naam"]}
 
 st.title("📘 Leerlingen Markering Formulier")
-st.write("Gebruik de knoppen om het aantal strepen per leerling aan te passen:")
+st.write("Klik op ➕ of ➖ om strepen toe te kennen of af te trekken (max 3).")
 
-# --- LEERLINGENLIJST MET STREPEN EN KNOPPEN ---
+# --- LEERLINGENLIJST MET BALK EN KNOPPEN ---
 for i, naam in enumerate(df["naam"]):
-    col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 3])
+    st.markdown(f"**{naam}**")
+    col1, col2, col3 = st.columns([1, 5, 3])
+
     with col1:
-        st.markdown(f"**{naam}**")
+        if st.button("➖", key=f"min_{i}"):
+            if st.session_state.strepen[naam] > 0:
+                st.session_state.strepen[naam] -= 1
+
     with col2:
-        st.markdown(f"**{st.session_state.strepen[naam]}**")
+        aantal = st.session_state.strepen[naam]
+        # Visuele balk: 🟦 = actief, 🔲 = leeg
+        balk = " ".join(["🟦" if j < aantal else "🔲" for j in range(3)])
+        st.markdown(f"<div style='text-align: center; font-size: 24px'>{balk}</div>", unsafe_allow_html=True)
+
     with col3:
         if st.button("➕", key=f"plus_{i}"):
             if st.session_state.strepen[naam] < 3:
                 st.session_state.strepen[naam] += 1
                 if st.session_state.strepen[naam] == 3:
                     st.session_state.wachten_op_straf[naam] = True
-    with col4:
-        if st.button("➖", key=f"min_{i}"):
-            if st.session_state.strepen[naam] > 0:
-                st.session_state.strepen[naam] -= 1
-    with col5:
-        if st.session_state.wachten_op_straf[naam]:
-            st.markdown("🟠 *Wachten op straf*")
+
+    # Statusmelding
+    if st.session_state.wachten_op_straf[naam]:
+        st.markdown("🟠 *Wachten op straf*")
+
+st.markdown("---")
 
 # --- OPSLAAN ---
 if st.button("✅ Opslaan"):
@@ -60,7 +67,8 @@ if st.button("✅ Opslaan"):
         df_nieuw = pd.DataFrame(invoer)
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
         st.success("✅ Markeringen opgeslagen!")
-        # Reset de waarden
+
+        # Reset waarden
         for naam in st.session_state.strepen:
             st.session_state.strepen[naam] = 0
             st.session_state.wachten_op_straf[naam] = False
