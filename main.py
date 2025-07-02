@@ -30,11 +30,12 @@ invoer = []
 for i, row in df.iterrows():
     naam = row["naam"]
 
-    col1, col2, col3 = st.columns([3, 2, 3])
-    
+    # Eén rij: naam | number_input | status
+    col1, col2, col3 = st.columns([3, 1, 4])
+
     with col1:
         st.markdown(f"**{naam}**")
-    
+
     with col2:
         strepen = st.number_input(
             label="",
@@ -52,13 +53,18 @@ for i, row in df.iterrows():
 
         if status == "wachten_op_straf":
             st.markdown("🟠 *Wachten op straf*")
+        else:
+            st.markdown("&nbsp;", unsafe_allow_html=True)  # lege ruimte om layout gelijk te houden
 
+    # Opslag
     if strepen > 0:
         invoer.append({
             "datum": datetime.today().strftime("%Y-%m-%d"),
             "naam": naam,
             "strepen": strepen
         })
+
+st.markdown("---")
 
 # --- OPSLAAN ---
 if st.button("✅ Opslaan"):
@@ -67,9 +73,7 @@ if st.button("✅ Opslaan"):
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
         st.success("✅ Markeringen opgeslagen!")
 
-        # Strafstatus blijft behouden
         df_status.to_csv(status_path, index=False)
-
         st.experimental_rerun()
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
