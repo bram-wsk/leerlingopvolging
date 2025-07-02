@@ -20,20 +20,21 @@ if "strepen" not in st.session_state:
 st.title("📘 Leerlingen Markering Formulier")
 st.write("Gebruik de knoppen om het aantal strepen per leerling aan te passen:")
 
+# --- LEERLINGENLIJST MET STREPEN EN KNOPPEN ---
 for i, naam in enumerate(df["naam"]):
     col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
     with col1:
         st.markdown(f"**{naam}**")
     with col2:
-        if st.button("➖", key=f"min_{i}"):
-            if st.session_state.strepen[naam] > 0:
-                st.session_state.strepen[naam] -= 1
-    with col3:
         st.markdown(f"**{st.session_state.strepen[naam]}**")
-    with col4:
+    with col3:
         if st.button("➕", key=f"plus_{i}"):
             if st.session_state.strepen[naam] < 10:
                 st.session_state.strepen[naam] += 1
+    with col4:
+        if st.button("➖", key=f"min_{i}"):
+            if st.session_state.strepen[naam] > 0:
+                st.session_state.strepen[naam] -= 1
 
 # --- OPSLAAN ---
 if st.button("✅ Opslaan"):
