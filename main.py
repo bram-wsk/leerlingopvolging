@@ -30,30 +30,35 @@ invoer = []
 for i, row in df.iterrows():
     naam = row["naam"]
 
-    strepen = st.number_input(
-        label=f"{naam}",
-        min_value=0,
-        max_value=3,
-        step=1,
-        key=f"strepen_{i}"
-    )
+    col1, col2, col3 = st.columns([3, 2, 3])
+    
+    with col1:
+        st.markdown(f"**{naam}**")
+    
+    with col2:
+        strepen = st.number_input(
+            label="",
+            min_value=0,
+            max_value=3,
+            step=1,
+            key=f"strepen_{i}"
+        )
 
-    # Bepaal of status geactiveerd moet worden
-    status = df_status.loc[df_status["naam"] == naam, "status"].values[0]
-    if strepen == 3 and status != "wachten_op_straf":
-        df_status.loc[df_status["naam"] == naam, "status"] = "wachten_op_straf"
+    with col3:
+        status = df_status.loc[df_status["naam"] == naam, "status"].values[0]
+        if strepen == 3 and status != "wachten_op_straf":
+            df_status.loc[df_status["naam"] == naam, "status"] = "wachten_op_straf"
+            status = "wachten_op_straf"
 
-    # Verzamel voor opslaan
+        if status == "wachten_op_straf":
+            st.markdown("🟠 *Wachten op straf*")
+
     if strepen > 0:
         invoer.append({
             "datum": datetime.today().strftime("%Y-%m-%d"),
             "naam": naam,
             "strepen": strepen
         })
-
-    # Toon status
-    if df_status.loc[df_status["naam"] == naam, "status"].values[0] == "wachten_op_straf":
-        st.markdown("🟠 *Wachten op straf*")
 
 # --- OPSLAAN ---
 if st.button("✅ Opslaan"):
@@ -62,15 +67,14 @@ if st.button("✅ Opslaan"):
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
         st.success("✅ Markeringen opgeslagen!")
 
-        # Strafstatus blijft behouden — géén reset!
+        # Strafstatus blijft behouden
         df_status.to_csv(status_path, index=False)
 
-        # Optioneel: herlaad interface na opslaan
         st.experimental_rerun()
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
-# --- OVERZICHT TONEN ALS BESTAND BESTAAT ---
+# --- OVERZICHT ---
 if os.path.exists("markeringen.csv"):
     st.subheader("📊 Overzicht van ingevoerde markeringen")
     df_mark = pd.read_csv("markeringen.csv")
