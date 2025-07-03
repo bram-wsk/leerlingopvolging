@@ -54,7 +54,7 @@ for naam in df_status.index:
         datum_str = df_status.loc[naam, "strafdatum"]
         if datum_str:
             try:
-                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=20, minutes=05)
+                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=20, minutes=6)
                 if nu >= strafmoment:
                     df_status.loc[naam, "status"] = "verdubbeld"
                     df_status.loc[naam, "verdubbel_datum"] = (nu + timedelta(days=1)).strftime("%d/%m/%Y")
@@ -67,7 +67,7 @@ for naam in df_status.index:
         datum_str = df_status.loc[naam, "verdubbel_datum"]
         if datum_str:
             try:
-                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=20, minutes=06)
+                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=20, minutes=7)
                 if nu >= strafmoment:
                     df_status.loc[naam, "status"] = "strafstudie"
                     gewijzigd = True
