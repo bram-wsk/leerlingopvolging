@@ -1,3 +1,4 @@
+Je zei:
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
@@ -60,6 +61,8 @@ st.title("📘 Leerlingen Markering Formulier")
 st.caption("Geef maximaal 3 strepen per leerling. Bij 3 strepen wordt automatisch 'wachten op straf' ingesteld.")
 
 # --- FORMULIER ---
+invoer = []
+
 for i, row in df.iterrows():
     naam = row["naam"]
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
@@ -78,27 +81,12 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-        # --- VERWERK STREPEN DIRECT ---
-        if strepen > 0:
-            vandaag = datetime.today().strftime("%Y-%m-%d")
-
-            # Voeg direct toe aan markeringen.csv
-            df_nieuw = pd.DataFrame([{
-                "datum": vandaag,
-                "naam": naam,
-                "strepen": strepen
-            }])
-            df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
-
-            # Update status indien nodig
-            if huidige_status not in ["wachten_op_straf", "verdubbeld"]:
-                if strepen == 3:
-                    df_status.loc[naam, "status"] = "wachten_op_straf"
-                else:
-                    df_status.loc[naam, "status"] = ""
-
-            df_status.reset_index().to_csv(status_path, index=False)
-            df_status = herstel_index(df_status)
+        if huidige_status not in ["wachten_op_straf", "verdubbeld"]:
+            if strepen == 3:
+                df_status.loc[naam, "status"] = "wachten_op_straf"
+                huidige_status = "wachten_op_straf"
+            else:
+                df_status.loc[naam, "status"] = huidige_status
 
     with col3:
         if huidige_status == "wachten_op_straf":
@@ -134,6 +122,26 @@ for i, row in df.iterrows():
 
         else:
             st.markdown("🟢 **Geen straf**")
+
+    if strepen > 0:
+        invoer.append({
+            "datum": datetime.today().strftime("%Y-%m-%d"),
+            "naam": naam,
+            "strepen": strepen
+        })
+
+# --- OPSLAAN ---
+st.markdown("---")
+if st.button("💾 Opslaan"):
+    if invoer:
+        df_nieuw = pd.DataFrame(invoer)
+        df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
+        st.success("✅ Markeringen opgeslagen!")
+
+        df_status.reset_index().to_csv(status_path, index=False)
+        st.rerun()
+    else:
+        st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
 
 # --- DOWNLOADKNOP ---
 st.markdown("---")
