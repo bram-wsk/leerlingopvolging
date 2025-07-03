@@ -5,6 +5,14 @@ import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="centered")
 
+# --- HULPFUNCTIE ---
+def herstel_index(df):
+    if "naam" not in df.columns:
+        df.reset_index(drop=False, inplace=True)
+    if "naam" in df.columns:
+        df.set_index("naam", inplace=True)
+    return df
+
 # --- LEES LEERLINGEN ---
 try:
     df = pd.read_csv("leerlingen.csv")
@@ -25,10 +33,7 @@ else:
     df_status = pd.DataFrame({"naam": df["naam"], "status": "", "strafdatum": ""})
     df_status.to_csv(status_path, index=False)
 
-if "naam" not in df_status.columns:
-    df_status.reset_index(inplace=True)
-
-df_status.set_index("naam", inplace=True)
+df_status = herstel_index(df_status)
 
 # --- CONTROLEER OP VERDUBBELING ---
 nu = datetime.now()
@@ -46,10 +51,9 @@ for naam in df_status.index:
         except ValueError:
             pass
 
-# --- Sla meteen op als iets aangepast werd ---
 if gewijzigd:
     df_status.reset_index().to_csv(status_path, index=False)
-    df_status.set_index("naam", inplace=True)
+    df_status = herstel_index(df_status)
 
 # --- TITEL ---
 st.title("📘 Leerlingen Markering Formulier")
@@ -87,7 +91,6 @@ for i, row in df.iterrows():
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
 
-            # Bestaande strafdatum ophalen, of standaard morgen
             huidige_datum_str = df_status.loc[naam, "strafdatum"]
             try:
                 huidige_datum = datetime.strptime(huidige_datum_str, "%d/%m/%Y").date()
@@ -104,7 +107,7 @@ for i, row in df.iterrows():
             if df_status.loc[naam, "strafdatum"] != nieuwe_datum:
                 df_status.loc[naam, "strafdatum"] = nieuwe_datum
                 df_status.reset_index().to_csv(status_path, index=False)
-                df_status.set_index("naam", inplace=True)
+                df_status = herstel_index(df_status)
 
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
@@ -135,7 +138,6 @@ if st.button("💾 Opslaan"):
         st.success("✅ Markeringen opgeslagen!")
 
         df_status.reset_index().to_csv(status_path, index=False)
-
         st.rerun()
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
