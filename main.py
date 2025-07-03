@@ -58,17 +58,17 @@ for i, row in df.iterrows():
 
         # Zet status direct als nodig en werk lokale status bij
         if huidige_status != "wachten_op_straf" and strepen == 3:
-            df_status.at[naam, "status"] = "wachten_op_straf"
+            df_status.loc[naam, "status"] = "wachten_op_straf"
             huidige_status = "wachten_op_straf"
 
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
             gekozen_datum = st.date_input("📅 Kies strafdatum", value=datetime.today().date(), key=f"datum_{i}")
-            df_status.at[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
+            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
-                df_status.at[naam, "status"] = ""
-                df_status.at[naam, "strafdatum"] = ""
+                df_status.loc[naam, "status"] = ""
+                df_status.loc[naam, "strafdatum"] = ""
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Strafstatus verwijderd voor {naam}")
                 st.rerun()
