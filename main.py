@@ -56,6 +56,11 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
+        # Zet status direct als nodig en werk lokale status bij
+        if huidige_status != "wachten_op_straf" and strepen == 3:
+            df_status.loc[naam, "status"] = "wachten_op_straf"
+            huidige_status = "wachten_op_straf"
+
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
@@ -69,10 +74,6 @@ for i, row in df.iterrows():
                 st.rerun()
         else:
             st.markdown("🟢 **Geen straf**")
-
-    # Zet status alleen als die nog niet op 'wachten_op_straf' staat én strepen == 3
-    if huidige_status != "wachten_op_straf" and strepen == 3:
-        df_status.loc[naam, "status"] = "wachten_op_straf"
 
     # Voeg invoer toe
     if strepen > 0:
