@@ -176,7 +176,7 @@ for i, row in df.iterrows():
             st.markdown("⚫ **Strafstudie**")
             st.info("Deze leerling heeft niet tijdig op de verdubbelde straf gereageerd.")
 
-            if st.button("📞 Ouders opgebeld → status op groen", key=f"ouders_opgebeld_{i}"):
+            if st.button("📞 Ouders opgebeld", key=f"ouders_opgebeld_{i}"):
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
