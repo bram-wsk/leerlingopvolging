@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo  # ✅ Tijdzone-ondersteuning
 import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="centered")
@@ -36,7 +37,7 @@ else:
 df_status = herstel_index(df_status)
 
 # --- CONTROLEER OP VERDUBBELING ---
-nu = datetime.now()
+nu = datetime.now(ZoneInfo("Europe/Brussels"))  # ✅ Juiste tijdzone
 gewijzigd = False
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
@@ -44,7 +45,7 @@ for naam in df_status.index:
 
     if status == "wachten_op_straf" and datum_str:
         try:
-            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y") + timedelta(hours=9, minutes=22)
+            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y") + timedelta(hours=9, minutes=27)
             if nu >= strafmoment:
                 df_status.loc[naam, "status"] = "verdubbeld"
                 gewijzigd = True
