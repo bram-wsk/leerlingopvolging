@@ -176,6 +176,14 @@ for i, row in df.iterrows():
             st.markdown("⚫ **Strafstudie**")
             st.info("Deze leerling heeft niet tijdig op de verdubbelde straf gereageerd.")
 
+            if st.button("📞 Ouders opgebeld → status op groen", key=f"ouders_opgebeld_{i}"):
+                df_status.loc[naam, "status"] = ""
+                df_status.loc[naam, "strafdatum"] = ""
+                df_status.loc[naam, "verdubbel_datum"] = ""
+                df_status.reset_index().to_csv(status_path, index=False)
+                st.success(f"Status op groen gezet na contact met ouders ({naam})")
+                st.rerun()
+
         else:
             st.markdown("🟢 **Geen straf**")
 
