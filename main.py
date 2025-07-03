@@ -18,7 +18,7 @@ except Exception as e:
 # --- LAAD STRAFSTATUS OF INITIALISEER ---
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
-    df_status = pd.read_csv(status_path, dtype=str)  # voorkom automatische datumconversie
+    df_status = pd.read_csv(status_path, dtype=str)
     if "strafdatum" not in df_status.columns:
         df_status["strafdatum"] = ""
 else:
@@ -32,7 +32,6 @@ df_status.set_index("naam", inplace=True)
 
 # --- CONTROLEER OP VERDUBBELING ---
 nu = datetime.now()
-
 gewijzigd = False
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
@@ -45,7 +44,7 @@ for naam in df_status.index:
                 df_status.loc[naam, "status"] = "verdubbeld"
                 gewijzigd = True
         except ValueError:
-            pass  # Ongeldig datumformaat
+            pass
 
 # --- Sla meteen op als iets aangepast werd ---
 if gewijzigd:
@@ -63,7 +62,6 @@ for i, row in df.iterrows():
     naam = row["naam"]
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    # Lijn met naam, input, status en knop
     col1, col2, col3 = st.columns([3, 2, 4])
 
     with col1:
@@ -88,13 +86,26 @@ for i, row in df.iterrows():
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
+
+            # Bestaande strafdatum ophalen, of standaard morgen
+            huidige_datum_str = df_status.loc[naam, "strafdatum"]
+            try:
+                huidige_datum = datetime.strptime(huidige_datum_str, "%d/%m/%Y").date()
+            except (ValueError, TypeError):
+                huidige_datum = (datetime.today() + timedelta(days=1)).date()
+
             gekozen_datum = st.date_input(
                 "📅 Kies strafdatum",
-                value=(datetime.today() + timedelta(days=1)).date(),
+                value=huidige_datum,
                 key=f"datum_{i}"
             )
-            # Opslaan als dd/mm/jjjj
-            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%d/%m/%Y")
+
+            nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
+            if df_status.loc[naam, "strafdatum"] != nieuwe_datum:
+                df_status.loc[naam, "strafdatum"] = nieuwe_datum
+                df_status.reset_index().to_csv(status_path, index=False)
+                df_status.set_index("naam", inplace=True)
+
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
@@ -108,7 +119,6 @@ for i, row in df.iterrows():
         else:
             st.markdown("🟢 **Geen straf**")
 
-    # Voeg invoer toe
     if strepen > 0:
         invoer.append({
             "datum": datetime.today().strftime("%Y-%m-%d"),
@@ -124,7 +134,6 @@ if st.button("💾 Opslaan"):
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
         st.success("✅ Markeringen opgeslagen!")
 
-        # Strafstatus opslaan
         df_status.reset_index().to_csv(status_path, index=False)
 
         st.rerun()
