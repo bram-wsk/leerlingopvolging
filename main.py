@@ -30,6 +30,28 @@ if "naam" not in df_status.columns:
 
 df_status.set_index("naam", inplace=True)
 
+# --- CONTROLEER OP VERDUBBELING ---
+nu = datetime.now()
+
+gewijzigd = False
+for naam in df_status.index:
+    status = df_status.loc[naam, "status"]
+    datum_str = df_status.loc[naam, "strafdatum"]
+
+    if status == "wachten_op_straf" and datum_str:
+        try:
+            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y") + timedelta(hours=16, minutes=15)
+            if nu >= strafmoment:
+                df_status.loc[naam, "status"] = "verdubbeld"
+                gewijzigd = True
+        except ValueError:
+            pass  # Ongeldig datumformaat
+
+# --- Sla meteen op als iets aangepast werd ---
+if gewijzigd:
+    df_status.reset_index().to_csv(status_path, index=False)
+    df_status.set_index("naam", inplace=True)
+
 # --- TITEL ---
 st.title("📘 Leerlingen Markering Formulier")
 st.caption("Geef maximaal 3 strepen per leerling. Bij 3 strepen wordt automatisch 'wachten op straf' ingesteld.")
@@ -56,7 +78,7 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-        if huidige_status != "wachten_op_straf":
+        if huidige_status not in ["wachten_op_straf", "verdubbeld"]:
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
                 huidige_status = "wachten_op_straf"
@@ -79,6 +101,10 @@ for i, row in df.iterrows():
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Strafstatus verwijderd voor {naam}")
                 st.rerun()
+
+        elif huidige_status == "verdubbeld":
+            st.markdown("🔴 **Straf verdubbeld**")
+
         else:
             st.markdown("🟢 **Geen straf**")
 
