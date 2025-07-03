@@ -64,6 +64,7 @@ for i, row in df.iterrows():
             df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
+                df_status.loc[naam, "strafdatum"] = ""
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Strafstatus verwijderd voor {naam}")
                 st.rerun()
