@@ -19,9 +19,8 @@ except Exception as e:
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
     df_status = pd.read_csv(status_path)
-if "strafdatum" not in df_status.columns:
-    df_status["strafdatum"] = ""
-
+    if "strafdatum" not in df_status.columns:
+        df_status["strafdatum"] = ""
 else:
     df_status = pd.DataFrame({"naam": df["naam"], "status": "", "strafdatum": ""})
     df_status.to_csv(status_path, index=False)
