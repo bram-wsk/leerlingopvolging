@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta  # aangepast
 import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="centered")
@@ -68,7 +68,11 @@ for i, row in df.iterrows():
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
-            gekozen_datum = st.date_input("📅 Kies strafdatum", value=datetime.today().date(), key=f"datum_{i}")
+            gekozen_datum = st.date_input(
+                "📅 Kies strafdatum",
+                value=(datetime.today() + timedelta(days=1)).date(),  # aangepast
+                key=f"datum_{i}"
+            )
             df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
