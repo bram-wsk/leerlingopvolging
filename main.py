@@ -32,12 +32,15 @@ if os.path.exists(status_path):
         df_status["strafdatum"] = ""
     if "verdubbel_datum" not in df_status.columns:
         df_status["verdubbel_datum"] = ""
+    if "laatst_bijgewerkt" not in df_status.columns:
+        df_status["laatst_bijgewerkt"] = ""
 else:
     df_status = pd.DataFrame({
         "naam": df["naam"],
         "status": "",
         "strafdatum": "",
-        "verdubbel_datum": ""
+        "verdubbel_datum": "",
+        "laatst_bijgewerkt": ""
     })
     df_status.to_csv(status_path, index=False)
 
@@ -54,10 +57,11 @@ for naam in df_status.index:
         datum_str = df_status.loc[naam, "strafdatum"]
         if datum_str:
             try:
-                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=20, minutes=6)
+                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=59)
                 if nu >= strafmoment:
                     df_status.loc[naam, "status"] = "verdubbeld"
                     df_status.loc[naam, "verdubbel_datum"] = (nu + timedelta(days=1)).strftime("%d/%m/%Y")
+                    df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                     gewijzigd = True
             except ValueError:
                 pass
@@ -67,9 +71,10 @@ for naam in df_status.index:
         datum_str = df_status.loc[naam, "verdubbel_datum"]
         if datum_str:
             try:
-                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=20, minutes=7)
+                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=59)
                 if nu >= strafmoment:
                     df_status.loc[naam, "status"] = "strafstudie"
+                    df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                     gewijzigd = True
             except ValueError:
                 pass
@@ -106,6 +111,7 @@ for i, row in df.iterrows():
         if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
+                df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                 huidige_status = "wachten_op_straf"
             else:
                 df_status.loc[naam, "status"] = huidige_status
@@ -136,6 +142,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
+                df_status.loc[naam, "laatst_bijgewerkt"] = ""
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Strafstatus verwijderd voor {naam}")
                 st.rerun()
@@ -168,6 +175,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
+                df_status.loc[naam, "laatst_bijgewerkt"] = ""
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Verdubbelde straf verwijderd voor {naam}")
                 st.rerun()
@@ -180,6 +188,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
+                df_status.loc[naam, "laatst_bijgewerkt"] = ""
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Status op groen gezet na contact met ouders ({naam})")
                 st.rerun()
