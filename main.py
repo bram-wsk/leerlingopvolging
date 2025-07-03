@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta  # aangepast
+from datetime import datetime, timedelta
 import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="centered")
@@ -56,8 +56,6 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-        # Zet status op 'wachten_op_straf' als het aantal strepen 3 is,
-        # maar wijzig niets als de status al 'wachten_op_straf' is
         if huidige_status != "wachten_op_straf":
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
@@ -70,10 +68,11 @@ for i, row in df.iterrows():
             st.markdown("🟠 **Wachten op straf**")
             gekozen_datum = st.date_input(
                 "📅 Kies strafdatum",
-                value=(datetime.today() + timedelta(days=1)).date(),  # aangepast
+                value=(datetime.today() + timedelta(days=1)).date(),
                 key=f"datum_{i}"
             )
-            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%d-%m-%Y")
+            # Format: dd/mm/jjjj
+            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%d/%m/%Y")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
