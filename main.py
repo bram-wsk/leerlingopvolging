@@ -73,7 +73,7 @@ for i, row in df.iterrows():
                 value=(datetime.today() + timedelta(days=1)).date(),  # aangepast
                 key=f"datum_{i}"
             )
-            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
+            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%d-%m-%Y")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
