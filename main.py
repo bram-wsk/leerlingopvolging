@@ -85,7 +85,7 @@ for i, row in df.iterrows():
     # Voeg invoer toe
     if strepen > 0:
         invoer.append({
-            "datum": datetime.today().strftime("%Y-%m-%d"),
+            "datum": datetime.today().strftime("%d/%m/%Y"),
             "naam": naam,
             "strepen": strepen
         })
