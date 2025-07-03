@@ -37,7 +37,7 @@ else:
 df_status = herstel_index(df_status)
 
 # --- CONTROLEER OP VERDUBBELING ---
-nu = datetime.now(ZoneInfo("Europe/Brussels"))  # ✅ Juiste tijdzone
+nu = datetime.now(ZoneInfo("Europe/Brussels"))  # ✅ Tijdzone-aware huidige tijd
 gewijzigd = False
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
@@ -45,7 +45,7 @@ for naam in df_status.index:
 
     if status == "wachten_op_straf" and datum_str:
         try:
-            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y") + timedelta(hours=9, minutes=27)
+            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=9, minutes=27)
             if nu >= strafmoment:
                 df_status.loc[naam, "status"] = "verdubbeld"
                 gewijzigd = True
@@ -96,7 +96,7 @@ for i, row in df.iterrows():
             try:
                 huidige_datum = datetime.strptime(huidige_datum_str, "%d/%m/%Y").date()
             except (ValueError, TypeError):
-                huidige_datum = (datetime.today() + timedelta(days=1)).date()
+                huidige_datum = (datetime.now(ZoneInfo("Europe/Brussels")) + timedelta(days=1)).date()
 
             gekozen_datum = st.date_input(
                 "📅 Kies strafdatum",
@@ -125,7 +125,7 @@ for i, row in df.iterrows():
 
     if strepen > 0:
         invoer.append({
-            "datum": datetime.today().strftime("%Y-%m-%d"),
+            "datum": datetime.now(ZoneInfo("Europe/Brussels")).strftime("%Y-%m-%d"),
             "naam": naam,
             "strepen": strepen
         })
