@@ -56,10 +56,14 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-        # Zet status direct als nodig en werk lokale status bij
-        if huidige_status != "wachten_op_straf" and strepen == 3:
-            df_status.loc[naam, "status"] = "wachten_op_straf"
-            huidige_status = "wachten_op_straf"
+        # Zet status op 'wachten_op_straf' als het aantal strepen 3 is,
+        # maar wijzig niets als de status al 'wachten_op_straf' is
+        if huidige_status != "wachten_op_straf":
+            if strepen == 3:
+                df_status.loc[naam, "status"] = "wachten_op_straf"
+                huidige_status = "wachten_op_straf"
+            else:
+                df_status.loc[naam, "status"] = huidige_status
 
     with col3:
         if huidige_status == "wachten_op_straf":
