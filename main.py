@@ -43,23 +43,36 @@ else:
 
 df_status = herstel_index(df_status)
 
-# --- CONTROLEER OP VERDUBBELING ---
+# --- CONTROLEER OP VERDUBBELING EN STRAFSTUDIE ---
 nu = datetime.now(ZoneInfo("Europe/Brussels"))  # ✅ Tijdzone-aware huidige tijd
 gewijzigd = False
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
-    datum_str = df_status.loc[naam, "strafdatum"]
 
-    if status == "wachten_op_straf" and datum_str:
-        try:
-            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=19, minutes=46)
-            if nu >= strafmoment:
-                df_status.loc[naam, "status"] = "verdubbeld"
-                # ✅ Voeg automatisch verdubbel_datum toe (morgen)
-                df_status.loc[naam, "verdubbel_datum"] = (nu + timedelta(days=1)).strftime("%d/%m/%Y")
-                gewijzigd = True
-        except ValueError:
-            pass
+    # -- Wachten op straf → Verdubbeld --
+    if status == "wachten_op_straf":
+        datum_str = df_status.loc[naam, "strafdatum"]
+        if datum_str:
+            try:
+                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=15)
+                if nu >= strafmoment:
+                    df_status.loc[naam, "status"] = "verdubbeld"
+                    df_status.loc[naam, "verdubbel_datum"] = (nu + timedelta(days=1)).strftime("%d/%m/%Y")
+                    gewijzigd = True
+            except ValueError:
+                pass
+
+    # -- Verdubbeld → Strafstudie --
+    elif status == "verdubbeld":
+        datum_str = df_status.loc[naam, "verdubbel_datum"]
+        if datum_str:
+            try:
+                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=15)
+                if nu >= strafmoment:
+                    df_status.loc[naam, "status"] = "strafstudie"
+                    gewijzigd = True
+            except ValueError:
+                pass
 
 if gewijzigd:
     df_status.reset_index().to_csv(status_path, index=False)
@@ -90,7 +103,7 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-        if huidige_status not in ["wachten_op_straf", "verdubbeld"]:
+        if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
                 huidige_status = "wachten_op_straf"
@@ -158,6 +171,10 @@ for i, row in df.iterrows():
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Verdubbelde straf verwijderd voor {naam}")
                 st.rerun()
+
+        elif huidige_status == "strafstudie":
+            st.markdown("⚫ **Strafstudie**")
+            st.info("Deze leerling heeft niet tijdig op de verdubbelde straf gereageerd.")
 
         else:
             st.markdown("🟢 **Geen straf**")
