@@ -19,8 +19,11 @@ except Exception as e:
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
     df_status = pd.read_csv(status_path)
+if "strafdatum" not in df_status.columns:
+    df_status["strafdatum"] = ""
+
 else:
-    df_status = pd.DataFrame({"naam": df["naam"], "status": ""})
+    df_status = pd.DataFrame({"naam": df["naam"], "status": "", "strafdatum": ""})
     df_status.to_csv(status_path, index=False)
 
 if "naam" not in df_status.columns:
@@ -57,6 +60,8 @@ for i, row in df.iterrows():
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
+            gekozen_datum = st.date_input("📅 Kies strafdatum", value=datetime.today().date(), key=f"datum_{i}")
+            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
                 df_status.reset_index().to_csv(status_path, index=False)
