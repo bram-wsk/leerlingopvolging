@@ -1,6 +1,7 @@
+Je zei:
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="centered")
@@ -18,7 +19,7 @@ except Exception as e:
 # --- LAAD STRAFSTATUS OF INITIALISEER ---
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
-    df_status = pd.read_csv(status_path)
+    df_status = pd.read_csv(status_path, dtype=str)  # voorkom automatische datumconversie
     if "strafdatum" not in df_status.columns:
         df_status["strafdatum"] = ""
 else:
@@ -56,8 +57,6 @@ for i, row in df.iterrows():
             key=f"strepen_{i}"
         )
 
-        # Zet status op 'wachten_op_straf' als het aantal strepen 3 is,
-        # maar wijzig niets als de status al 'wachten_op_straf' is
         if huidige_status != "wachten_op_straf":
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
@@ -68,8 +67,13 @@ for i, row in df.iterrows():
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
-            gekozen_datum = st.date_input("📅 Kies strafdatum", value=datetime.today().date(), key=f"datum_{i}")
-            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%Y-%m-%d")
+            gekozen_datum = st.date_input(
+                "📅 Kies strafdatum",
+                value=(datetime.today() + timedelta(days=1)).date(),
+                key=f"datum_{i}"
+            )
+            # Opslaan als dd/mm/jjjj
+            df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%d/%m/%Y")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
