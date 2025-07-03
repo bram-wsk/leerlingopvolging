@@ -44,7 +44,7 @@ for naam in df_status.index:
 
     if status == "wachten_op_straf" and datum_str:
         try:
-            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y") + timedelta(hours=16, minutes=15)
+            strafmoment = datetime.strptime(datum_str, "%d/%m/%Y") + timedelta(hours=9, minutes=22)
             if nu >= strafmoment:
                 df_status.loc[naam, "status"] = "verdubbeld"
                 gewijzigd = True
