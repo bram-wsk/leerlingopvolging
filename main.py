@@ -18,7 +18,7 @@ except Exception as e:
 # --- LAAD STRAFSTATUS OF INITIALISEER ---
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
-    df_status = pd.read_csv(status_path)
+    df_status = pd.read_csv(status_path, dtype=str)  # voorkom automatische datumconversie
     if "strafdatum" not in df_status.columns:
         df_status["strafdatum"] = ""
 else:
@@ -71,7 +71,7 @@ for i, row in df.iterrows():
                 value=(datetime.today() + timedelta(days=1)).date(),
                 key=f"datum_{i}"
             )
-            # Format: dd/mm/jjjj
+            # Opslaan als dd/mm/jjjj
             df_status.loc[naam, "strafdatum"] = gekozen_datum.strftime("%d/%m/%Y")
             if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
                 df_status.loc[naam, "status"] = ""
