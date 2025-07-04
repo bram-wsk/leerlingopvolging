@@ -106,16 +106,16 @@ for i, row in df.iterrows():
         except (KeyError, ValueError, TypeError):
             vorige_strepen = 0
 
-    strepen = st.number_input(
-        label="",
-        min_value=0,
-        max_value=3,
-        step=1,
-        value=vorige_strepen,
-        key=f"strepen_{i}"
-)
+        strepen = st.number_input(
+            label="",
+            min_value=0,
+            max_value=3,
+            step=1,
+            value=vorige_strepen,
+            key=f"strepen_{i}"
+        )
 
-    if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
+        if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
                 df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
@@ -123,7 +123,6 @@ for i, row in df.iterrows():
             else:
                 df_status.loc[naam, "status"] = huidige_status
 
-        # 🔄 Strepen bijwerken in statusbestand
         df_status.loc[naam, "strepen"] = str(strepen)
 
     with col3:
