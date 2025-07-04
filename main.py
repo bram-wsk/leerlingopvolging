@@ -115,7 +115,6 @@ for i, row in df.iterrows():
         key=f"strepen_{i}"
 )
 
-
         if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
             if strepen == 3:
                 df_status.loc[naam, "status"] = "wachten_op_straf"
