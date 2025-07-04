@@ -7,9 +7,9 @@ import os
 
 # --- INSTELLINGEN ---
 CSV_PATH = "strafstatus.csv"
-EMAIL_VAN = "jouw_email@gmail.com"              # <-- Vervang dit
-EMAIL_NAAR = "jouw_email@gmail.com"             # <-- Vervang dit
-APP_WACHTWOORD = "je_app_wachtwoord"            # <-- Zie stap 2
+EMAIL_VAN = "leerlingopvolging@gmail.com"              # <-- Vervang dit
+EMAIL_NAAR = "brambombaert@spwe.be"             # <-- Vervang dit
+APP_WACHTWOORD = "xtjt rvrr uuop cofc"            # <-- Zie stap 2
 
 # --- LADEN DATA ---
 vandaag = datetime.now().strftime("%Y-%m-%d")
