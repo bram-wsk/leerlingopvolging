@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo  # ✅ Tijdzone-ondersteuning
+from zoneinfo import ZoneInfo
 import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="centered")
@@ -34,25 +34,27 @@ if os.path.exists(status_path):
         df_status["verdubbel_datum"] = ""
     if "laatst_bijgewerkt" not in df_status.columns:
         df_status["laatst_bijgewerkt"] = ""
+    if "strepen" not in df_status.columns:
+        df_status["strepen"] = "0"
 else:
     df_status = pd.DataFrame({
         "naam": df["naam"],
         "status": "",
         "strafdatum": "",
         "verdubbel_datum": "",
-        "laatst_bijgewerkt": ""
+        "laatst_bijgewerkt": "",
+        "strepen": "0"
     })
     df_status.to_csv(status_path, index=False)
 
 df_status = herstel_index(df_status)
 
 # --- CONTROLEER OP VERDUBBELING EN STRAFSTUDIE ---
-nu = datetime.now(ZoneInfo("Europe/Brussels"))  # ✅ Tijdzone-aware huidige tijd
+nu = datetime.now(ZoneInfo("Europe/Brussels"))
 gewijzigd = False
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
 
-    # -- Wachten op straf → Verdubbeld --
     if status == "wachten_op_straf":
         datum_str = df_status.loc[naam, "strafdatum"]
         if datum_str:
@@ -66,7 +68,6 @@ for naam in df_status.index:
             except ValueError:
                 pass
 
-    # -- Verdubbeld → Strafstudie --
     elif status == "verdubbeld":
         datum_str = df_status.loc[naam, "verdubbel_datum"]
         if datum_str:
@@ -116,6 +117,9 @@ for i, row in df.iterrows():
             else:
                 df_status.loc[naam, "status"] = huidige_status
 
+        # 🔄 Strepen bijwerken in statusbestand
+        df_status.loc[naam, "strepen"] = str(strepen)
+
     with col3:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
@@ -143,6 +147,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
                 df_status.loc[naam, "laatst_bijgewerkt"] = ""
+                df_status.loc[naam, "strepen"] = "0"
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Strafstatus verwijderd voor {naam}")
                 st.rerun()
@@ -176,6 +181,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
                 df_status.loc[naam, "laatst_bijgewerkt"] = ""
+                df_status.loc[naam, "strepen"] = "0"
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Verdubbelde straf verwijderd voor {naam}")
                 st.rerun()
@@ -189,6 +195,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
                 df_status.loc[naam, "laatst_bijgewerkt"] = ""
+                df_status.loc[naam, "strepen"] = "0"
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Status op groen gezet na contact met ouders ({naam})")
                 st.rerun()
@@ -209,9 +216,8 @@ if st.button("💾 Opslaan"):
     if invoer:
         df_nieuw = pd.DataFrame(invoer)
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
-        st.success("✅ Markeringen opgeslagen!")
-
         df_status.reset_index().to_csv(status_path, index=False)
+        st.success("✅ Markeringen opgeslagen!")
         st.rerun()
     else:
         st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
