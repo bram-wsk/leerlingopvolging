@@ -101,13 +101,20 @@ for i, row in df.iterrows():
         st.markdown(f"### 👤 {naam}")
 
     with col2:
-        strepen = st.number_input(
-            label="",
-            min_value=0,
-            max_value=3,
-            step=1,
-            key=f"strepen_{i}"
-        )
+        try:
+            vorige_strepen = int(df_status.loc[naam, "strepen"])
+        except (KeyError, ValueError, TypeError):
+            vorige_strepen = 0
+
+    strepen = st.number_input(
+        label="",
+        min_value=0,
+        max_value=3,
+        step=1,
+        value=vorige_strepen,
+        key=f"strepen_{i}"
+)
+
 
         if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
             if strepen == 3:
