@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 import pandas as pd
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -151,8 +151,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
-                df_status.loc[naam, "laatst_bijgewerkt"] = ""
-                df_status.loc[naam, "strepen"] = "0"
+                df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Strafstatus verwijderd voor {naam}")
                 st.rerun()
@@ -185,8 +184,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
-                df_status.loc[naam, "laatst_bijgewerkt"] = ""
-                df_status.loc[naam, "strepen"] = "0"
+                df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Verdubbelde straf verwijderd voor {naam}")
                 st.rerun()
@@ -199,8 +197,7 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = ""
                 df_status.loc[naam, "strafdatum"] = ""
                 df_status.loc[naam, "verdubbel_datum"] = ""
-                df_status.loc[naam, "laatst_bijgewerkt"] = ""
-                df_status.loc[naam, "strepen"] = "0"
+                df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                 df_status.reset_index().to_csv(status_path, index=False)
                 st.success(f"Status op groen gezet na contact met ouders ({naam})")
                 st.rerun()
