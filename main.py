@@ -28,16 +28,9 @@ except Exception as e:
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
     df_status = pd.read_csv(status_path, dtype=str)
-    if "strafdatum" not in df_status.columns:
-        df_status["strafdatum"] = ""
-    if "verdubbel_datum" not in df_status.columns:
-        df_status["verdubbel_datum"] = ""
-    if "laatst_bijgewerkt" not in df_status.columns:
-        df_status["laatst_bijgewerkt"] = ""
-    if "strepen" not in df_status.columns:
-        df_status["strepen"] = "0"
-    if "status" not in df_status.columns:
-        df_status["status"] = ""
+    for kolom in ["strafdatum", "verdubbel_datum", "laatst_bijgewerkt", "strepen", "status"]:
+        if kolom not in df_status.columns:
+            df_status[kolom] = ""
 else:
     df_status = pd.DataFrame({
         "naam": df["naam"],
@@ -59,9 +52,9 @@ for naam in df_status.index:
 
     if status == "wachten_op_straf":
         datum_str = df_status.loc[naam, "strafdatum"]
-        if datum_str:
+        if isinstance(datum_str, str) and datum_str.strip():
             try:
-                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=59)
+                strafmoment = datetime.strptime(datum_str.strip(), "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=59)
                 if nu >= strafmoment:
                     df_status.loc[naam, "status"] = "verdubbeld"
                     df_status.loc[naam, "verdubbel_datum"] = (nu + timedelta(days=1)).strftime("%d/%m/%Y")
@@ -72,9 +65,9 @@ for naam in df_status.index:
 
     elif status == "verdubbeld":
         datum_str = df_status.loc[naam, "verdubbel_datum"]
-        if datum_str:
+        if isinstance(datum_str, str) and datum_str.strip():
             try:
-                strafmoment = datetime.strptime(datum_str, "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=59)
+                strafmoment = datetime.strptime(datum_str.strip(), "%d/%m/%Y").replace(tzinfo=ZoneInfo("Europe/Brussels")) + timedelta(hours=16, minutes=59)
                 if nu >= strafmoment:
                     df_status.loc[naam, "status"] = "strafstudie"
                     df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
@@ -126,12 +119,12 @@ for i, row in df.iterrows():
             else:
                 nieuwe_status = ""
 
-        if nieuwe_status != huidige_status:
+        if nieuwe_status != huidige_status or strepen != vorige_strepen:
             invoer.append({
                 "datum": nu.strftime("%Y-%m-%d"),
                 "naam": naam,
                 "strepen": strepen,
-                "status": f"{huidige_status} ➜ {nieuwe_status}"
+                "status": f"{huidige_status} ➜ {nieuwe_status}" if nieuwe_status != huidige_status else ""
             })
 
         df_status.loc[naam, "status"] = nieuwe_status
@@ -239,26 +232,4 @@ for i, row in df.iterrows():
             st.markdown("🟢 **Geen straf**")
 
 # --- OPSLAAN ---
-st.markdown("---")
-if st.button("💾 Opslaan"):
-    if invoer:
-        df_nieuw = pd.DataFrame(invoer)
-        bestand_bestaat = os.path.exists("markeringen.csv")
-        df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not bestand_bestaat)
-        df_status.reset_index().to_csv(status_path, index=False)
-        st.success("✅ Wijzigingen opgeslagen!")
-        st.rerun()
-    else:
-        st.warning("⚠️ Geen wijzigingen. Niets opgeslagen.")
-
-# --- DOWNLOADKNOP ---
-st.markdown("---")
-if os.path.exists("markeringen.csv"):
-    st.markdown("### 📥 Download markeringen")
-    with open("markeringen.csv", "rb") as f:
-        st.download_button(
-            label="⬇️ Download markeringen.csv",
-            data=f,
-            file_name="markeringen.csv",
-            mime="text/csv"
-        )
+st.markdo
