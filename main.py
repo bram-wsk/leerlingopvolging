@@ -140,13 +140,9 @@ for i, row in df.iterrows():
             except (ValueError, TypeError):
                 huidige_datum = (nu + timedelta(days=1)).date()
 
-            gekozen_datum = st.date_input(
-                "📅 Kies strafdatum",
-                value=huidige_datum,
-                key=f"datum_{i}"
-            )
-
+            gekozen_datum = st.date_input("📅 Kies strafdatum", value=huidige_datum, key=f"datum_{i}")
             nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
+
             if df_status.loc[naam, "strafdatum"] != nieuwe_datum:
                 df_status.loc[naam, "strafdatum"] = nieuwe_datum
                 df_status.reset_index().to_csv(status_path, index=False)
@@ -177,13 +173,9 @@ for i, row in df.iterrows():
             except (ValueError, TypeError):
                 huidige_datum = (nu + timedelta(days=1)).date()
 
-            gekozen_datum = st.date_input(
-                "📅 Kies datum voor verdubbelde straf",
-                value=huidige_datum,
-                key=f"verdubbel_datum_{i}"
-            )
-
+            gekozen_datum = st.date_input("📅 Kies datum voor verdubbelde straf", value=huidige_datum, key=f"verdubbel_datum_{i}")
             nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
+
             if df_status.loc[naam, "verdubbel_datum"] != nieuwe_datum:
                 df_status.loc[naam, "verdubbel_datum"] = nieuwe_datum
                 df_status.reset_index().to_csv(status_path, index=False)
@@ -231,7 +223,32 @@ for i, row in df.iterrows():
         else:
             st.markdown("🟢 **Geen straf**")
 
+# --- DEBUG: toon wat er gelogd zou worden ---
+st.markdown("---")
+st.write("📋 Invoer die klaarstaat om opgeslagen te worden:")
+st.write(invoer)
+
 # --- OPSLAAN ---
 st.markdown("---")
+if st.button("💾 Opslaan"):
+    if invoer:
+        df_nieuw = pd.DataFrame(invoer)
+        bestand_bestaat = os.path.exists("markeringen.csv")
+        df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not bestand_bestaat)
+        df_status.reset_index().to_csv(status_path, index=False)
+        st.success("✅ Wijzigingen opgeslagen!")
+        st.rerun()
+    else:
+        st.warning("⚠️ Geen wijzigingen. Niets opgeslagen.")
 
-
+# --- DOWNLOADKNOP ---
+st.markdown("---")
+if os.path.exists("markeringen.csv"):
+    st.markdown("### 📥 Download markeringen")
+    with open("markeringen.csv", "rb") as f:
+        st.download_button(
+            label="⬇️ Download markeringen.csv",
+            data=f,
+            file_name="markeringen.csv",
+            mime="text/csv"
+        )
