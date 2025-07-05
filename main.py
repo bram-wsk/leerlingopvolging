@@ -232,5 +232,6 @@ for i, row in df.iterrows():
             st.markdown("🟢 **Geen straf**")
 
 # --- OPSLAAN ---
-st.markdown
+st.markdown("---")
+
 
