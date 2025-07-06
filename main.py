@@ -143,7 +143,7 @@ for i, row in df.iterrows():
             except (ValueError, TypeError):
                 huidige_datum = (nu + timedelta(days=1)).date()
 
-            col_datum, _ = st.columns([1, 5])
+            col_datum, _ = st.columns([1.5, 4.5])
             with col_datum:
                 gekozen_datum = st.date_input("📅 Strafdatum", value=huidige_datum, key=f"datum_{i}")
             nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
@@ -169,7 +169,7 @@ for i, row in df.iterrows():
             except (ValueError, TypeError):
                 huidige_datum = (nu + timedelta(days=1)).date()
 
-            col_datum, _ = st.columns([1, 5])
+            col_datum, _ = st.columns([1.5, 4.5])
             with col_datum:
                 gekozen_datum = st.date_input("📅 Verdubbeling", value=huidige_datum, key=f"verdubbel_datum_{i}")
             nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
