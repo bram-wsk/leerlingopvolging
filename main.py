@@ -89,7 +89,7 @@ st.title("📘 Leerlingen Markering Formulier")
 st.caption("Geef maximaal 3 strepen per leerling. Bij 3 strepen wordt automatisch 'wachten op straf' ingesteld.")
 
 # --- FORMULIER ---
-invoer = []
+log_strepen = []
 
 for i, row in df.iterrows():
     naam = row["naam"]
@@ -206,7 +206,7 @@ for i, row in df.iterrows():
             st.markdown("🟢 **Geen straf**")
 
     if strepen > 0:
-        invoer.append({
+        log_strepen.append({
             "datum": datetime.now(ZoneInfo("Europe/Brussels")).strftime("%Y-%m-%d"),
             "naam": naam,
             "strepen": strepen
@@ -215,11 +215,12 @@ for i, row in df.iterrows():
 # --- OPSLAAN ---
 st.markdown("---")
 if st.button("💾 Opslaan"):
-    if invoer:
-        df_nieuw = pd.DataFrame(invoer)
-        df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
-    
-    # Altijd opslaan naar strafstatus, ook als invoer leeg is
+    # Logbestand bijwerken (enkel > 0)
+    if log_strepen:
+        df_log = pd.DataFrame(log_strepen)
+        df_log.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
+
+    # Altijd statusbestand bijwerken
     df_status.reset_index().to_csv(status_path, index=False)
     st.success("✅ Wijzigingen opgeslagen!")
     st.rerun()
