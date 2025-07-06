@@ -143,7 +143,7 @@ for i, row in df.iterrows():
             except (ValueError, TypeError):
                 huidige_datum = (nu + timedelta(days=1)).date()
 
-            col_datum, col_knop = st.columns([2, 2])
+            col_datum, col_knop = st.columns([4, 1])
             with col_datum:
                 st.markdown("**📅 Strafdatum**")
                 gekozen_datum = st.date_input(label="", value=huidige_datum, key=f"datum_{i}")
@@ -155,7 +155,7 @@ for i, row in df.iterrows():
 
             with col_knop:
                 st.markdown("&nbsp;")
-                if st.button("✅ Straf afgehandeld", key=f"straf_af_{i}"):
+                if st.button("✅", key=f"straf_af_{i}"):
                     df_status.loc[naam, "status"] = ""
                     df_status.loc[naam, "strafdatum"] = ""
                     df_status.loc[naam, "verdubbel_datum"] = ""
@@ -171,7 +171,7 @@ for i, row in df.iterrows():
             except (ValueError, TypeError):
                 huidige_datum = (nu + timedelta(days=1)).date()
 
-            col_datum, col_knop = st.columns([2, 2])
+            col_datum, col_knop = st.columns([4, 1])
             with col_datum:
                 st.markdown("**📅 Verdubbeling**")
                 gekozen_datum = st.date_input(label="", value=huidige_datum, key=f"verdubbel_datum_{i}")
@@ -186,7 +186,7 @@ for i, row in df.iterrows():
 
             with col_knop:
                 st.markdown("&nbsp;")
-                if st.button("✅ Verdubbeling afgehandeld", key=f"verdubbel_af_{i}"):
+                if st.button("✅", key=f"verdubbel_af_{i}"):
                     df_status.loc[naam, "status"] = ""
                     df_status.loc[naam, "strafdatum"] = ""
                     df_status.loc[naam, "verdubbel_datum"] = ""
@@ -196,12 +196,12 @@ for i, row in df.iterrows():
                     st.rerun()
 
         elif huidige_status == "strafstudie":
-            col_info, col_knop = st.columns([2.5, 1.5])
+            col_info, col_knop = st.columns([4, 1])
             with col_info:
                 st.info("Niet gereageerd op verdubbelde straf.")
             with col_knop:
                 st.markdown("&nbsp;")
-                if st.button("📞 Ouders opgebeld", key=f"ouders_opgebeld_{i}"):
+                if st.button("📞", key=f"ouders_opgebeld_{i}"):
                     df_status.loc[naam, "status"] = ""
                     df_status.loc[naam, "strafdatum"] = ""
                     df_status.loc[naam, "verdubbel_datum"] = ""
