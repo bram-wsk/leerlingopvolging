@@ -218,11 +218,11 @@ if st.button("💾 Opslaan"):
     if invoer:
         df_nieuw = pd.DataFrame(invoer)
         df_nieuw.to_csv("markeringen.csv", mode="a", index=False, header=not os.path.exists("markeringen.csv"))
-        df_status.reset_index().to_csv(status_path, index=False)
-        st.success("✅ Markeringen opgeslagen!")
-        st.rerun()
-    else:
-        st.warning("⚠️ Geen strepen ingevoerd. Niets opgeslagen.")
+    
+    # Altijd opslaan naar strafstatus, ook als invoer leeg is
+    df_status.reset_index().to_csv(status_path, index=False)
+    st.success("✅ Wijzigingen opgeslagen!")
+    st.rerun()
 
 # --- DOWNLOADKNOP ---
 st.markdown("---")
