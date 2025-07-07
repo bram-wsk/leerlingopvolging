@@ -122,7 +122,7 @@ for i, row in df.iterrows():
     else:
         status_emoji = "🟢 Geen straf"
 
-    rij = st.columns([3, 1, 2, 1.5])
+    rij = st.columns([3, 1.2, 2, 2])
     with rij[0]:
         st.markdown(f"### {naam}")
 
