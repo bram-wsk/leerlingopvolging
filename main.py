@@ -112,6 +112,16 @@ for i, row in df.iterrows():
     naam = row["naam"]
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
+    # Bepaal status-emoji
+    if huidige_status == "wachten_op_straf":
+        status_emoji = "🟠 Wachten op straf"
+    elif huidige_status == "verdubbeld":
+        status_emoji = "🔴 Verdubbeld"
+    elif huidige_status == "strafstudie":
+        status_emoji = "⚫ Strafstudie"
+    else:
+        status_emoji = "🟢 Geen straf"
+
     rij = st.columns([3, 1.2, 2, 2])
     with rij[0]:
         st.markdown(f"### {naam}")
@@ -129,20 +139,14 @@ for i, row in df.iterrows():
                 df_status.loc[naam, "status"] = "wachten_op_straf"
                 df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                 huidige_status = "wachten_op_straf"
+                status_emoji = "🟠 Wachten op straf"
             else:
                 df_status.loc[naam, "status"] = huidige_status
 
         df_status.loc[naam, "strepen"] = str(strepen)
 
     with rij[2]:
-        if huidige_status == "wachten_op_straf":
-            st.markdown("🟠 **Wachten op straf**")
-        elif huidige_status == "verdubbeld":
-            st.markdown("🔴 **Verdubbeld**")
-        elif huidige_status == "strafstudie":
-            st.markdown("⚫ **Strafstudie**")
-        else:
-            st.markdown("🟢 **Geen straf**")
+        st.markdown(f"<div style='padding-top: 10px'><strong>{status_emoji}</strong></div>", unsafe_allow_html=True)
 
     with rij[3]:
         if huidige_status == "wachten_op_straf":
@@ -162,7 +166,7 @@ for i, row in df.iterrows():
                     df_status = herstel_index(df_status)
 
             with col_knop:
-                st.markdown("&nbsp;")
+                st.markdown("<div style='padding-top: 10px'>", unsafe_allow_html=True)
                 if st.button("✅", key=f"straf_af_{i}"):
                     df_status.loc[naam, "status"] = ""
                     df_status.loc[naam, "strafdatum"] = ""
@@ -171,6 +175,7 @@ for i, row in df.iterrows():
                     df_status.reset_index().to_csv(status_path, index=False)
                     st.success(f"Strafstatus verwijderd voor {naam}")
                     st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
         elif huidige_status == "verdubbeld":
             huidige_datum_str = df_status.loc[naam, "verdubbel_datum"]
@@ -192,7 +197,7 @@ for i, row in df.iterrows():
                     st.warning("⚠️ Deze strafdatum is vandaag of in het verleden. Actie vereist!")
 
             with col_knop:
-                st.markdown("&nbsp;")
+                st.markdown("<div style='padding-top: 10px'>", unsafe_allow_html=True)
                 if st.button("✅", key=f"verdubbel_af_{i}"):
                     df_status.loc[naam, "status"] = ""
                     df_status.loc[naam, "strafdatum"] = ""
@@ -201,13 +206,14 @@ for i, row in df.iterrows():
                     df_status.reset_index().to_csv(status_path, index=False)
                     st.success(f"Verdubbeling verwijderd voor {naam}")
                     st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
         elif huidige_status == "strafstudie":
             col_info, col_knop = st.columns([4, 1])
             with col_info:
                 st.info("Niet gereageerd op verdubbelde straf.")
             with col_knop:
-                st.markdown("&nbsp;")
+                st.markdown("<div style='padding-top: 10px'>", unsafe_allow_html=True)
                 if st.button("📞", key=f"ouders_opgebeld_{i}"):
                     df_status.loc[naam, "status"] = ""
                     df_status.loc[naam, "strafdatum"] = ""
@@ -216,6 +222,7 @@ for i, row in df.iterrows():
                     df_status.reset_index().to_csv(status_path, index=False)
                     st.success(f"Status op groen gezet na contact met ouders ({naam})")
                     st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
     if strepen > 0:
         log_strepen.append({
