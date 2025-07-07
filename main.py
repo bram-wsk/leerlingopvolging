@@ -6,6 +6,15 @@ import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="wide")
 
+# --- VERBERG LABELS VAN NUMBER_INPUT ---
+st.markdown("""
+    <style>
+    label[for^="strepen_"] {
+        display: none;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # --- HULPFUNCTIE ---
 def herstel_index(df):
     if "naam" not in df.columns:
@@ -107,7 +116,7 @@ for i, row in df.iterrows():
             vorige_strepen = 0
 
         strepen = st.number_input(
-            label="",
+            label="Aantal strepen",  # label moet aanwezig zijn voor zichtbare +/-
             min_value=0,
             max_value=3,
             step=1,
