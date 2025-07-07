@@ -6,6 +6,18 @@ import os
 
 st.set_page_config(page_title="Leerlingen Markering", page_icon="📘", layout="wide")
 
+# --- STYLING ---
+st.markdown("""
+<style>
+    .element-container:has(input) {
+        padding-top: 0.5rem;
+    }
+    input[type=number] {
+        text-align: center;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # --- HULPFUNCTIE ---
 def herstel_index(df):
     if "naam" not in df.columns:
@@ -24,7 +36,7 @@ except Exception as e:
     st.error(f"❌ Fout bij inlezen van leerlingen: {e}")
     st.stop()
 
-# --- LAAD STRAFSTATUS OF INITIALISEER ---
+# --- LAAD STRAFSTATUS ---
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
     df_status = pd.read_csv(status_path, dtype=str)
@@ -49,12 +61,11 @@ else:
 
 df_status = herstel_index(df_status)
 
-# --- CONTROLEER OP VERDUBBELING EN STRAFSTUDIE ---
+# --- CONTROLE OP STATUSOVERGANG ---
 nu = datetime.now(ZoneInfo("Europe/Brussels"))
 gewijzigd = False
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
-
     if status == "wachten_op_straf":
         datum_str = df_status.loc[naam, "strafdatum"]
         if datum_str:
@@ -67,7 +78,6 @@ for naam in df_status.index:
                     gewijzigd = True
             except ValueError:
                 pass
-
     elif status == "verdubbeld":
         datum_str = df_status.loc[naam, "verdubbel_datum"]
         if datum_str:
@@ -91,29 +101,28 @@ st.caption("Geef maximaal 3 strepen per leerling. Bij 3 strepen wordt automatisc
 # --- FORMULIER ---
 log_strepen = []
 
+# Kolomtitels boven de tabel
+kop = st.columns([3, 1.2, 2, 2])
+with kop[0]: st.markdown("**👤 Naam**")
+with kop[1]: st.markdown("**✏️ Strepen**")
+with kop[2]: st.markdown("**📍 Status**")
+with kop[3]: st.markdown("**📅 Actie / Datum**")
+
 for i, row in df.iterrows():
     naam = row["naam"]
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    col1, col2, col3, col4 = st.columns([3, 1.2, 2, 2])
+    rij = st.columns([3, 1.2, 2, 2])
+    with rij[0]:
+        st.markdown(f"### {naam}")
 
-    with col1:
-        st.markdown(f"### 👤 {naam}")
-
-    with col2:
+    with rij[1]:
         try:
             vorige_strepen = int(df_status.loc[naam, "strepen"])
         except (KeyError, ValueError, TypeError):
             vorige_strepen = 0
 
-        strepen = st.number_input(
-            label="",
-            min_value=0,
-            max_value=3,
-            step=1,
-            value=vorige_strepen,
-            key=f"strepen_{i}"
-        )
+        strepen = st.number_input("", min_value=0, max_value=3, step=1, value=vorige_strepen, key=f"strepen_{i}")
 
         if huidige_status not in ["wachten_op_straf", "verdubbeld", "strafstudie"]:
             if strepen == 3:
@@ -125,7 +134,7 @@ for i, row in df.iterrows():
 
         df_status.loc[naam, "strepen"] = str(strepen)
 
-    with col3:
+    with rij[2]:
         if huidige_status == "wachten_op_straf":
             st.markdown("🟠 **Wachten op straf**")
         elif huidige_status == "verdubbeld":
@@ -135,7 +144,7 @@ for i, row in df.iterrows():
         else:
             st.markdown("🟢 **Geen straf**")
 
-    with col4:
+    with rij[3]:
         if huidige_status == "wachten_op_straf":
             huidige_datum_str = df_status.loc[naam, "strafdatum"]
             try:
@@ -145,7 +154,6 @@ for i, row in df.iterrows():
 
             col_datum, col_knop = st.columns([4, 1])
             with col_datum:
-                st.markdown("**📅 Strafdatum**")
                 gekozen_datum = st.date_input(label="", value=huidige_datum, key=f"datum_{i}")
                 nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
                 if df_status.loc[naam, "strafdatum"] != nieuwe_datum:
@@ -173,7 +181,6 @@ for i, row in df.iterrows():
 
             col_datum, col_knop = st.columns([4, 1])
             with col_datum:
-                st.markdown("**📅 Verdubbeling**")
                 gekozen_datum = st.date_input(label="", value=huidige_datum, key=f"verdubbel_datum_{i}")
                 nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
                 if df_status.loc[naam, "verdubbel_datum"] != nieuwe_datum:
