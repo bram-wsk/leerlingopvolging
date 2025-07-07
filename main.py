@@ -146,7 +146,9 @@ for i, row in df.iterrows():
         df_status.loc[naam, "strepen"] = str(strepen)
 
     with rij[2]:
-        st.markdown(f"<div style='padding-top: 10px'><strong>{status_emoji}</strong></div>", unsafe_allow_html=True)
+        col_status = st.columns([1])
+        with col_status[0]:
+            st.markdown(f"<div style='padding-top: 12px'><strong>{status_emoji}</strong></div>", unsafe_allow_html=True)
 
     with rij[3]:
         if huidige_status == "wachten_op_straf":
