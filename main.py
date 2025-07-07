@@ -95,7 +95,7 @@ for i, row in df.iterrows():
     naam = row["naam"]
     huidige_status = df_status.loc[naam, "status"] if naam in df_status.index else ""
 
-    col1, col2, col3, col4 = st.columns([3, 2, 2, 6])
+    col1, col2, col3, col4 = st.columns([3, 1.2, 2, 6])
 
     with col1:
         st.markdown(f"### 👤 {naam}")
