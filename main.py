@@ -1,4 +1,4 @@
-import streamlit as st  
+import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -28,14 +28,9 @@ except Exception as e:
 status_path = "strafstatus.csv"
 if os.path.exists(status_path):
     df_status = pd.read_csv(status_path, dtype=str)
-    if "strafdatum" not in df_status.columns:
-        df_status["strafdatum"] = ""
-    if "verdubbel_datum" not in df_status.columns:
-        df_status["verdubbel_datum"] = ""
-    if "laatst_bijgewerkt" not in df_status.columns:
-        df_status["laatst_bijgewerkt"] = ""
-    if "strepen" not in df_status.columns:
-        df_status["strepen"] = "0"
+    for kolom in ["strafdatum", "verdubbel_datum", "laatst_bijgewerkt", "strepen"]:
+        if kolom not in df_status.columns:
+            df_status[kolom] = "" if kolom != "strepen" else "0"
 else:
     df_status = pd.DataFrame({
         "naam": df["naam"],
@@ -52,6 +47,7 @@ df_status = herstel_index(df_status)
 # --- CONTROLEER OP VERDUBBELING EN STRAFSTUDIE ---
 nu = datetime.now(ZoneInfo("Europe/Brussels"))
 gewijzigd = False
+
 for naam in df_status.index:
     status = df_status.loc[naam, "status"]
 
@@ -126,14 +122,12 @@ for i, row in df.iterrows():
         df_status.loc[naam, "strepen"] = str(strepen)
 
     with col3:
-        if huidige_status == "wachten_op_straf":
-            st.markdown("🟠 **Wachten op straf**")
-        elif huidige_status == "verdubbeld":
-            st.markdown("🔴 **Verdubbeld**")
-        elif huidige_status == "strafstudie":
-            st.markdown("⚫ **Strafstudie**")
-        else:
-            st.markdown("🟢 **Geen straf**")
+        status_tekst = {
+            "wachten_op_straf": "🟠 **Wachten op straf**",
+            "verdubbeld": "🔴 **Verdubbeld**",
+            "strafstudie": "⚫ **Strafstudie**"
+        }.get(huidige_status, "🟢 **Geen straf**")
+        st.markdown(status_tekst)
 
     with col4:
         if huidige_status == "wachten_op_straf":
@@ -146,7 +140,7 @@ for i, row in df.iterrows():
             col_datum, col_knop = st.columns([4, 1])
             with col_datum:
                 st.markdown("**📅 Strafdatum**")
-                gekozen_datum = st.date_input(label="", value=huidige_datum, key=f"datum_{i}")
+                gekozen_datum = st.date_input("", value=huidige_datum, key=f"datum_{i}")
                 nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
                 if df_status.loc[naam, "strafdatum"] != nieuwe_datum:
                     df_status.loc[naam, "strafdatum"] = nieuwe_datum
@@ -156,9 +150,8 @@ for i, row in df.iterrows():
             with col_knop:
                 st.markdown("&nbsp;")
                 if st.button("✅", key=f"straf_af_{i}"):
-                    df_status.loc[naam, "status"] = ""
-                    df_status.loc[naam, "strafdatum"] = ""
-                    df_status.loc[naam, "verdubbel_datum"] = ""
+                    for kolom in ["status", "strafdatum", "verdubbel_datum"]:
+                        df_status.loc[naam, kolom] = ""
                     df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                     df_status.reset_index().to_csv(status_path, index=False)
                     st.success(f"Strafstatus verwijderd voor {naam}")
@@ -174,22 +167,20 @@ for i, row in df.iterrows():
             col_datum, col_knop = st.columns([4, 1])
             with col_datum:
                 st.markdown("**📅 Verdubbeling**")
-                gekozen_datum = st.date_input(label="", value=huidige_datum, key=f"verdubbel_datum_{i}")
+                gekozen_datum = st.date_input("", value=huidige_datum, key=f"verdubbel_datum_{i}")
                 nieuwe_datum = gekozen_datum.strftime("%d/%m/%Y")
                 if df_status.loc[naam, "verdubbel_datum"] != nieuwe_datum:
                     df_status.loc[naam, "verdubbel_datum"] = nieuwe_datum
                     df_status.reset_index().to_csv(status_path, index=False)
                     df_status = herstel_index(df_status)
-
                 if gekozen_datum <= datetime.now().date():
                     st.warning("⚠️ Deze strafdatum is vandaag of in het verleden. Actie vereist!")
 
             with col_knop:
                 st.markdown("&nbsp;")
                 if st.button("✅", key=f"verdubbel_af_{i}"):
-                    df_status.loc[naam, "status"] = ""
-                    df_status.loc[naam, "strafdatum"] = ""
-                    df_status.loc[naam, "verdubbel_datum"] = ""
+                    for kolom in ["status", "strafdatum", "verdubbel_datum"]:
+                        df_status.loc[naam, kolom] = ""
                     df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                     df_status.reset_index().to_csv(status_path, index=False)
                     st.success(f"Verdubbeling verwijderd voor {naam}")
@@ -202,9 +193,8 @@ for i, row in df.iterrows():
             with col_knop:
                 st.markdown("&nbsp;")
                 if st.button("📞", key=f"ouders_opgebeld_{i}"):
-                    df_status.loc[naam, "status"] = ""
-                    df_status.loc[naam, "strafdatum"] = ""
-                    df_status.loc[naam, "verdubbel_datum"] = ""
+                    for kolom in ["status", "strafdatum", "verdubbel_datum"]:
+                        df_status.loc[naam, kolom] = ""
                     df_status.loc[naam, "laatst_bijgewerkt"] = nu.strftime("%Y-%m-%d")
                     df_status.reset_index().to_csv(status_path, index=False)
                     st.success(f"Status op groen gezet na contact met ouders ({naam})")
